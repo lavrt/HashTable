@@ -6,7 +6,7 @@
 
 #include "hashFunction.h"
 
-THashTable* HT_create() {
+THashTable* HT_Create() {
     THashTable* ht = (THashTable*)calloc(1, sizeof(THashTable));
     assert(ht);
 
@@ -19,12 +19,13 @@ THashTable* HT_create() {
     return ht;
 }
 
-void HT_destroy(THashTable* ht) {
+void HT_Destroy(THashTable* ht) {
     for (size_t i = 0; i < ht->size; i++) {
         TNode* current = ht->buckets[i];
         while (current) {
             TNode* temp = current;
             current = current->next;
+            free(temp->value);
             free(temp->key);
             free(temp);
         }
@@ -34,13 +35,13 @@ void HT_destroy(THashTable* ht) {
     free(ht);
 }
 
-void HT_insert(THashTable* ht, const char* key, void* value) {
+void HT_Insert(THashTable* ht, const char* key, void* value) {
     unsigned index = Hash(key, ht->size);
     TNode* current = ht->buckets[index];
 
     while (current) {
         if (!strcmp(current->key, key)) {
-            current->value = value;
+            ++*(size_t*)(current->value);
             return;
         }
         current = current->next;
@@ -49,14 +50,19 @@ void HT_insert(THashTable* ht, const char* key, void* value) {
     TNode* newNode = (TNode*)calloc(1, sizeof(TNode));
     assert(newNode);
 
+    size_t* tempValue = (size_t*)calloc(1, sizeof(size_t));
+    assert(tempValue);
+
+    *(tempValue) = 1;
+
     newNode->key = strdup(key);
-    newNode->value = value;
+    newNode->value = tempValue;
     newNode->next = ht->buckets[index];
     ht->buckets[index] = newNode;
     ht->count++;
 }
 
-void* HT_get(THashTable* ht, const char* key) {
+void* HT_Get(THashTable* ht, const char* key) {
     unsigned index = Hash(key, ht->size);
     TNode* current = ht->buckets[index];
 
@@ -70,7 +76,7 @@ void* HT_get(THashTable* ht, const char* key) {
     return NULL;
 }
 
-EStatus HT_remove(THashTable* ht, const char* key) {
+EStatus HT_Remove(THashTable* ht, const char* key) {
     unsigned index = Hash(key, ht->size);
     TNode* current = ht->buckets[index];
     TNode* prev = NULL;
@@ -83,6 +89,7 @@ EStatus HT_remove(THashTable* ht, const char* key) {
                 prev->next = current->next;
             }
 
+            free(current->value);
             free(current->key);
             free(current);
             ht->count--;
@@ -97,16 +104,74 @@ EStatus HT_remove(THashTable* ht, const char* key) {
     return Failed;
 }
 
-void HT_dump(THashTable* ht) {
-    FILE* dumpFile = fopen(DUMP_FILE_NAME, "wb");
+void HT_GraphDump(THashTable* ht) {
+    FILE* dumpFile = fopen(NAME_OF_GRAPH_DUMP_FILE, "wb");
+    assert(dumpFile);
+
+    fprintf(dumpFile,
+        "digraph HashTable {\n"
+        "    rankdir=\"LR\";\n" 
+        "    node [shape=record, style=filled, fillcolor=lightblue];\n\n"
+        "    hash_table [label=\""
+    );
+
+    for (size_t i = 0; i < ht->size; i++) {
+        fprintf(dumpFile, "<%lu>%lu", i, i);
+        if (i == ht->size - 1) {
+            fprintf(dumpFile, "\", shape=record, fillcolor=lightgrey];\n\n");
+            break;
+        }
+        fprintf(dumpFile, "|");
+    }
+    
+    fprintf(dumpFile, "    node [shape=box];\n\n");
+
+    for (size_t i = 0; i < ht->size; i++) {
+        fprintf(dumpFile,
+            "    subgraph cluster_%lu {\n"
+            "        label=\"bucket %lu\";\n",
+            i, i
+        );
+
+        TNode* current = ht->buckets[i];
+        for (size_t j = 0; current; j++) {
+            fprintf(dumpFile,
+                "        node_%lu_%lu [label=\"\\\"%s\\\" : %lu\"];\n",
+                i, j, current->key, *((size_t*)current->value)
+            );
+            current = current->next;
+        }
+
+        current = ht->buckets[i];
+        fprintf(dumpFile, "       ");
+        for (size_t j = 0; current; j++) {
+            fprintf(dumpFile, " node_%lu_%lu", i, j);
+            if (current->next) {
+                fprintf(dumpFile, " ->");
+            } else {
+                fprintf(dumpFile, ";\n    }\n");
+            }
+            current = current->next;
+        }
+    }
+    fprintf(dumpFile, "}\n");
+
+    // dot -Tpng ./dump/dump.dot -o graph.png
+
+    fclose(dumpFile);
+}
+
+void HT_TextDump(THashTable* ht) {
+    FILE* dumpFile = fopen(NAME_OF_TEXT_DUMP_FILE, "wb");
     assert(dumpFile);
 
     fprintf(
         dumpFile,
         "hash table: [%p]\n"
         "number of buckets: %lu\n"
-        "total number of items: %lu\n\n",
-        ht, ht->size, ht->count
+        "total number of items: %lu\n"
+        "load factor: %.lf\n\n",
+        ht, ht->size, ht->count, (double)ht->count / ht->size
     );
 
     for (size_t i = 0; i < ht->size; i++) {

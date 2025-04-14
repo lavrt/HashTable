@@ -5,10 +5,11 @@
 #include "hashTable.h"
 #include "std.h"
 
-const char* const TEXT_FILE_NAME = "text.txt";
+const char* const TEXT_FILE_NAME = "./data/text.txt";
+const char* delimiters = " \t\n\r.,;:!?()\"\'‘’";
 
 int main() {
-    THashTable* ht = HT_create();
+    THashTable* ht = HT_Create();
 
     FILE* inputFile = fopen(TEXT_FILE_NAME, "rb");
     assert(inputFile);
@@ -23,12 +24,12 @@ int main() {
     fclose(inputFile);
     
     int temp = 0;
-    for (char* token = strtok(textBuffer, " "); token; token = strtok(NULL, " ")) {
-        HT_insert(ht, token, &temp);
+    for (char* token = strtok(textBuffer, delimiters); token; token = strtok(NULL, delimiters)) {
+        HT_Insert(ht, token, &temp);
     }
 
-    HT_dump(ht);
-    HT_destroy(ht);
+    HT_TextDump(ht);
+    HT_Destroy(ht);
     
     return 0;
 }

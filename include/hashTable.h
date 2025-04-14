@@ -3,8 +3,10 @@
 
 #include <stdlib.h>
 
-const size_t TABLE_SIZE = 1024;
-const char* const DUMP_FILE_NAME = "dump.txt";
+const size_t TABLE_SIZE = 340;
+
+const char* const NAME_OF_GRAPH_DUMP_FILE = "./dump/dump.dot";
+const char* const NAME_OF_TEXT_DUMP_FILE = "./dump/dump.txt";
 
 struct TNode {
     char* key;
@@ -23,11 +25,12 @@ enum EStatus {
     Finished
 };
 
-THashTable* HT_create();
-void HT_destroy(THashTable* ht);
-void HT_insert(THashTable* ht, const char* key, void* value);
-void* HT_get(THashTable* ht, const char* key);
-EStatus HT_remove(THashTable* ht, const char* key);
-void HT_dump(THashTable* ht);
+THashTable* HT_Create();
+void HT_Destroy(THashTable* ht);
+void HT_Insert(THashTable* ht, const char* key, void* value);
+void* HT_Get(THashTable* ht, const char* key);
+EStatus HT_Remove(THashTable* ht, const char* key);
+void HT_GraphDump(THashTable* ht);
+void HT_TextDump(THashTable* ht);
 
 #endif // HASH_TABLE_H

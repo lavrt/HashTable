@@ -6,6 +6,7 @@ SRC_DIR = src
 BIN_DIR = bin
 BUILD_DIR = build
 INC_DIR = include
+DUMP_DIR = dump
 
 SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/hashTable.cpp $(SRC_DIR)/hashFunction.cpp $(SRC_DIR)/std.cpp
 OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
@@ -21,7 +22,8 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 .PHONY: clean run
 
 clean:
-	rm -rf $(BIN_DIR) $(BUILD_DIR)
+	rm -rf $(BIN_DIR) $(BUILD_DIR) $(DUMP_DIR)
 
 run: $(BIN_DIR)/$(TARGET)
+	@mkdir -p $(DUMP_DIR)
 	@./$<
