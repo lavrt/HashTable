@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "hashFunction.h"
 
@@ -94,4 +95,31 @@ EStatus HT_remove(THashTable* ht, const char* key) {
     }
 
     return Failed;
+}
+
+void HT_dump(THashTable* ht) {
+    FILE* dumpFile = fopen(DUMP_FILE_NAME, "wb");
+    assert(dumpFile);
+
+    fprintf(
+        dumpFile,
+        "hash table: [%p]\n"
+        "number of buckets: %lu\n"
+        "total number of items: %lu\n\n",
+        ht, ht->size, ht->count
+    );
+
+    for (size_t i = 0; i < ht->size; i++) {
+        TNode* current = ht->buckets[i];
+        fprintf(dumpFile, "[%p] [%lu] ", current, i);
+
+        while (current) {
+            fprintf(dumpFile, "->{key: %s | value: %d}", current->key, *((int*)current->value));
+            current = current->next;
+        }
+
+        fprintf(dumpFile, "\n");
+    }
+
+    fclose(dumpFile);
 }

@@ -3,7 +3,8 @@
 
 #include <stdlib.h>
 
-const size_t TABLE_SIZE = 512;
+const size_t TABLE_SIZE = 32;
+const char* const DUMP_FILE_NAME = "dump.txt";
 
 struct TNode {
     char* key;
@@ -27,5 +28,6 @@ void HT_destroy(THashTable* ht);
 void HT_insert(THashTable* ht, const char* key, void* value);
 void* HT_get(THashTable* ht, const char* key);
 EStatus HT_remove(THashTable* ht, const char* key);
+void HT_dump(THashTable* ht);
 
 #endif // HASH_TABLE_H
