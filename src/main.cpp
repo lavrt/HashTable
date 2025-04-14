@@ -1,23 +1,33 @@
 #include <stdio.h>
+#include <string.h>
+#include <assert.h>
 
 #include "hashTable.h"
+#include "std.h"
+
+const char* const TEXT_FILE_NAME = "text.txt";
 
 int main() {
     THashTable* ht = HT_create();
+
+    FILE* inputFile = fopen(TEXT_FILE_NAME, "rb");
+    assert(inputFile);
+
+    size_t fileSize = GetFileSize(inputFile);
+
+    char* textBuffer = (char*)calloc(fileSize + 1, sizeof(char));
+    assert(textBuffer);
+
+    fread(textBuffer, sizeof(char), fileSize, inputFile);
+
+    fclose(inputFile);
     
-    int a = 54;
-    int b = 48;
-    HT_insert(ht, "apple", &a);
-    HT_insert(ht, "orange", &b);
-    
-    printf("apple: %d\n", *(int*)HT_get(ht, "apple"));
-    printf("orange: %d\n", *(int*)HT_get(ht, "orange"));
-    
-    // HT_remove(ht, "apple");
-    printf("apple after remove: %s\n", HT_get(ht, "apple") ? "exists" : "not found");
+    int temp = 0;
+    for (char* token = strtok(textBuffer, " "); token; token = strtok(NULL, " ")) {
+        HT_insert(ht, token, &temp);
+    }
 
     HT_dump(ht);
-    
     HT_destroy(ht);
     
     return 0;

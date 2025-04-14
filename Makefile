@@ -7,7 +7,7 @@ BIN_DIR = bin
 BUILD_DIR = build
 INC_DIR = include
 
-SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/hashTable.cpp $(SRC_DIR)/hashFunction.cpp
+SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/hashTable.cpp $(SRC_DIR)/hashFunction.cpp $(SRC_DIR)/std.cpp
 OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 
 $(BIN_DIR)/$(TARGET): $(OBJECTS) 

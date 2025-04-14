@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-const size_t TABLE_SIZE = 32;
+const size_t TABLE_SIZE = 1024;
 const char* const DUMP_FILE_NAME = "dump.txt";
 
 struct TNode {

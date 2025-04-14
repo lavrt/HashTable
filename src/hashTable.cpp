@@ -111,10 +111,10 @@ void HT_dump(THashTable* ht) {
 
     for (size_t i = 0; i < ht->size; i++) {
         TNode* current = ht->buckets[i];
-        fprintf(dumpFile, "[%p] [%lu] ", current, i);
+        fprintf(dumpFile, "[%p] ", current);
 
         while (current) {
-            fprintf(dumpFile, "->{key: %s | value: %d}", current->key, *((int*)current->value));
+            fprintf(dumpFile, "{ %s | %d } ", current->key, *((int*)current->value));
             current = current->next;
         }
 
