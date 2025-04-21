@@ -14,9 +14,8 @@ size_t GetFileSize(FILE* fd) {
 }
 
 int FastStrcmp(const char* s1, const char* s2) {
-    __m256i vec1 = _mm256_load_si256((__m256i*)s1);
-    __m256i vec2 = _mm256_load_si256((__m256i*)s2);
-    __m256i cmp = _mm256_cmpeq_epi8(vec1, vec2);
-    unsigned mask = _mm256_movemask_epi8(cmp);
-    return (mask == 0xFFFFFFFF) ? 0 : 1;
+    const __m256i vec1 = _mm256_load_si256((const __m256i*)s1);
+    const __m256i vec2 = _mm256_load_si256((const __m256i*)s2);
+    const __m256i res = _mm256_xor_si256(vec1, vec2);
+    return !_mm256_testz_si256(res, res);
 }

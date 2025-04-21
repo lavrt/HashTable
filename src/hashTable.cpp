@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "hashFunction.h"
+#include "std.h"
 
 THashTable* HT_Create() {
     THashTable* ht = (THashTable*)calloc(1, sizeof(THashTable));
@@ -35,12 +36,12 @@ void HT_Destroy(THashTable* ht) {
     free(ht);
 }
 
-void HT_Insert(THashTable* ht, const char* key) {
+void HT_Insert(THashTable* ht, char* key) {
     unsigned index = Hash(key, ht->size);
     TNode* current = ht->buckets[index];
 
     while (current) {
-        if (!strcmp(current->key, key)) {
+        if (!FastStrcmp(current->key, key)) {
             ++*(size_t*)(current->value);
             return;
         }
@@ -55,7 +56,7 @@ void HT_Insert(THashTable* ht, const char* key) {
 
     *(tempValue) = 1;
 
-    newNode->key = strdup(key);
+    newNode->key = key;
     newNode->value = tempValue;
     newNode->next = ht->buckets[index];
     ht->buckets[index] = newNode;
@@ -67,7 +68,7 @@ void* HT_Get(THashTable* ht, const char* key) {
     TNode* current = ht->buckets[index];
 
     while (current) {
-        if (!strcmp(current->key, key)) {
+        if (!FastStrcmp(current->key, key)) {
             return current->value;
         }
         current = current->next;

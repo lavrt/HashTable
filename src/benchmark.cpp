@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <immintrin.h>
 
 #include "std.h"
 
@@ -24,14 +25,20 @@ char* FillBuffer() {
 
 void FillHashTable(THashTable* ht, char* textBuffer) {
     for (char* token = strtok(textBuffer, delimiters); token; token = strtok(NULL, delimiters)) {
-        HT_Insert(ht, token);
+        char* key = (char*)aligned_alloc(32, sizeof(char) * 32); // NOTE
+        assert(key);
+        strcpy(key, token);
+        HT_Insert(ht, key);
     }
 }
 
 void RunSearchBenchmark(THashTable* ht, char* textBuffer) {
     size_t temp = 0;
     for (char* token = strtok(textBuffer, delimiters); token; token = strtok(NULL, delimiters)) {
-        temp = *(size_t*)HT_Get(ht, token);
+        char* key = (char*)aligned_alloc(32, sizeof(char) * 32); // NOTE
+        assert(key);
+        strcpy(key, token);
+        temp = *(size_t*)HT_Get(ht, key);
         // printf("%lu ", temp);
     }
 }

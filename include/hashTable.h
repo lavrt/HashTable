@@ -27,7 +27,7 @@ enum EStatus {
 
 THashTable* HT_Create();
 void HT_Destroy(THashTable* ht);
-void HT_Insert(THashTable* ht, const char* key);
+void HT_Insert(THashTable* ht, char* key);
 void* HT_Get(THashTable* ht, const char* key);
 EStatus HT_Remove(THashTable* ht, const char* key);
 void HT_GraphDump(THashTable* ht);
