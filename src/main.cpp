@@ -1,35 +1,38 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <sched.h>
 
 #include "hashTable.h"
-#include "std.h"
+#include "benchmark.h"
 
-const char* const TEXT_FILE_NAME = "./data/text.txt";
-const char* delimiters = " \t\n\r.,;:!?()\"\'‘’";
+static int SetCpuCore(int coreIndex);
 
 int main() {
+    SetCpuCore(7); // NOTE
+
     THashTable* ht = HT_Create();
-
-    FILE* inputFile = fopen(TEXT_FILE_NAME, "rb");
-    assert(inputFile);
-
-    size_t fileSize = GetFileSize(inputFile);
-
-    char* textBuffer = (char*)calloc(fileSize + 1, sizeof(char));
-    assert(textBuffer);
-
-    fread(textBuffer, sizeof(char), fileSize, inputFile);
-
-    fclose(inputFile);
     
-    int temp = 0;
-    for (char* token = strtok(textBuffer, delimiters); token; token = strtok(NULL, delimiters)) {
-        HT_Insert(ht, token, &temp);
-    }
+    char* textBuffer = FillBuffer();
+    FillHashTable(ht, textBuffer);
+    free(textBuffer);
+
+    textBuffer = FillBuffer();
+    RunSearchBenchmark(ht, textBuffer);
+    free(textBuffer);
 
     HT_TextDump(ht);
     HT_Destroy(ht);
     
+    // FIXME free array
+
     return 0;
+}
+
+static int SetCpuCore(int coreIndex) {
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(coreIndex, &mask);
+
+    return (sched_setaffinity(0, sizeof(mask), &mask) == -1) ? 0 : 1;
 }

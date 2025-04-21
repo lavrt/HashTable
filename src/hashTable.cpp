@@ -35,7 +35,7 @@ void HT_Destroy(THashTable* ht) {
     free(ht);
 }
 
-void HT_Insert(THashTable* ht, const char* key, void* value) {
+void HT_Insert(THashTable* ht, const char* key) {
     unsigned index = Hash(key, ht->size);
     TNode* current = ht->buckets[index];
 
