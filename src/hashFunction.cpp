@@ -1,7 +1,6 @@
 #include "hashFunction.h"
 
-unsigned MurmurHash2(const char* key, unsigned len)
-{
+unsigned MurmurHash2(const char* key, unsigned len) {
     const unsigned m = 0x5bd1e995;
     const unsigned seed = 0;
     const int r = 24;
@@ -11,8 +10,7 @@ unsigned MurmurHash2(const char* key, unsigned len)
     const unsigned char* data = (const unsigned char*)key;
     unsigned k = 0;
 
-    while (len >= 4)
-    {
+    while (len >= 4) {
         k  = data[0];
         k |= data[1] << 8;
         k |= data[2] << 16;
@@ -29,8 +27,7 @@ unsigned MurmurHash2(const char* key, unsigned len)
         len -= 4;
     }
 
-    switch (len)
-    {
+    switch (len) {
         case 3:
             h ^= data[2] << 16;
         case 2:

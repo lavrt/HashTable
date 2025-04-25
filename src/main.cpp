@@ -9,7 +9,7 @@
 static int SetCpuCore(int coreIndex);
 
 int main() {
-    SetCpuCore(7); // NOTE
+    SetCpuCore(7); 
 
     THashTable* ht = HT_Create();
     
@@ -23,8 +23,6 @@ int main() {
 
     HT_TextDump(ht);
     HT_Destroy(ht);
-    
-    // FIXME free array
 
     return 0;
 }
