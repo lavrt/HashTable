@@ -6,12 +6,13 @@
 const char* const kNameOfGraphDumpFile = "./dump/dump.dot";
 const char* const kNameOfTextDumpFile = "./dump/dump.txt";
 
-const size_t kHashSize = 340;
-const size_t kMaxNodes = 8192;
+const size_t kHashSize = 7000;
+const size_t kMaxNodes = 2000000;
 const size_t kMaxKeyLength = 32;
+const size_t kMemoryAlignment = 32;
 
 struct TNode {
-    char key[kMaxKeyLength];
+    alignas(kMemoryAlignment) char key[kMaxKeyLength];
     size_t value;
     int next;
 };

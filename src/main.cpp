@@ -1,4 +1,5 @@
 #include <sched.h>
+#include <assert.h>
 
 #include "hashTable.h"
 #include "benchmark.h"
@@ -12,18 +13,19 @@ static int SetCpuCore(int coreIndex);
 int main() {
     SetCpuCore(7); 
 
-    THashTable ht = {};
-    HT_Create(&ht);
-    
+    THashTable* ht = (THashTable*)calloc(1, sizeof(THashTable));
+    assert(ht);
+    HT_Create(ht);
+
     char* textBuffer = FillBuffer();
-    FillHashTable(&ht, textBuffer);
+    FillHashTable(ht, textBuffer);
     free(textBuffer);
 
     textBuffer = FillBuffer();
-    RunSearchBenchmark(&ht, textBuffer);
+    RunSearchBenchmark(ht, textBuffer);
     free(textBuffer);
 
-    HT_TextDump(&ht);
+    HT_TextDump(ht);
 
     return 0;
 }
