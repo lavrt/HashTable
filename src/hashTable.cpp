@@ -41,7 +41,7 @@ void HT_Insert(THashTable* ht, char* key) {
     TNode* current = ht->buckets[index];
 
     while (current) {
-        if (!FastStrcmp(current->key, key)) {
+        if (!strcmp(current->key, key)) {
             ++*(size_t*)(current->value);
             return;
         }
@@ -68,7 +68,7 @@ void* HT_Get(THashTable* ht, const char* key) {
     TNode* current = ht->buckets[index];
 
     while (current) {
-        if (!FastStrcmp(current->key, key)) {
+        if (!strcmp(current->key, key)) {
             return current->value;
         }
         current = current->next;
