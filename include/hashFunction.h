@@ -7,8 +7,8 @@
 
 unsigned MurmurHash2(const char* key, unsigned len);
 
-inline unsigned Hash(const char* key, size_t tableSize) {
-    return MurmurHash2(key, strlen(key)) % tableSize;
+inline unsigned Hash(const char* key) {
+    return MurmurHash2(key, strlen(key)) % kHashSize;
 }
 
 #endif // HASH_FUNCTION_H
