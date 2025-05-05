@@ -10,7 +10,7 @@
 
 // static ------------------------------------------------------------------------------------------
 
-int FastStrcmp(const char* s1, const char* s2);
+static int FastStrcmp(const char* s1, const char* s2);
 static int AllocateNode(THashTable* ht);
 static void FreeNode(THashTable* ht, int index);
 static size_t CountUsedBuckets(const THashTable* ht);
@@ -36,7 +36,7 @@ EStatus HT_Insert(THashTable* ht, const char* key) {
     int current = ht->buckets[hashValue];
 
     while (current != -1) {
-        if (!strcmp(ht->nodes[current].key, key)) {
+        if (!FastStrcmp(ht->nodes[current].key, key)) {
             ht->nodes[current].value++;
             return Finished;
         }
@@ -62,7 +62,7 @@ size_t HT_Get(THashTable* ht, const char* key) {
     int current = ht->buckets[hashValue];
 
     while (current != -1) {
-        if (!strcmp(ht->nodes[current].key, key)) {
+        if (!FastStrcmp(ht->nodes[current].key, key)) {
             return ht->nodes[current].value;
         }
         current = ht->nodes[current].next;
@@ -77,7 +77,7 @@ EStatus HT_Remove(THashTable* ht, const char* key) {
     int prev = -1;
 
     while (current != -1) {
-        if (strcmp(ht->nodes[current].key, key)) {
+        if (FastStrcmp(ht->nodes[current].key, key)) {
             prev = current;
             current = ht->nodes[current].next;
             continue;
@@ -185,7 +185,7 @@ void HT_TextDump(THashTable* ht) {
 
 // static ------------------------------------------------------------------------------------------
 
-int FastStrcmp(const char* s1, const char* s2) {
+static int FastStrcmp(const char* s1, const char* s2) {
     const __m256i vec1 = _mm256_load_si256((const __m256i*)s1);
     const __m256i vec2 = _mm256_load_si256((const __m256i*)s2);
     const __m256i res = _mm256_xor_si256(vec1, vec2);

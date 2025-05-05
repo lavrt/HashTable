@@ -20,7 +20,6 @@ int main() {
     char* textBuffer = FillBuffer();
     FillHashTable(ht, textBuffer);
     free(textBuffer);
-
     textBuffer = FillBuffer();
     RunSearchBenchmark(ht, textBuffer);
     free(textBuffer);

@@ -75,7 +75,6 @@ unsigned MurmurHash2(const char* key, unsigned len) {
 |-------------------------|------------------------------------|
 | CPU                     | 12th Gen Intel Core i5-12450H × 12 |
 | Average CPU frequency   | 2.0 GHz                            |
-| Average CPU temperature | 72°C                               |
 | The operating system    | Ubuntu 24.04.2 LTS                 |
 | Kernel Version          | Linux 6.11.0-21-generic            |
 | gcc compiler version    | 13.3.0                             |
@@ -85,7 +84,7 @@ unsigned MurmurHash2(const char* key, unsigned len) {
 # Program optimization
 
 ## Initial performance
-##### Time interval of program execution: 14.4 seconds.
+##### Time interval of program execution: 15.4 seconds.
 ##### The hottest functions:
 - ```strcmp``` (65.9% of the time)
 - ```strcpy``` (6.5% of the time)
@@ -100,3 +99,6 @@ static int FastStrcmp(const char* s1, const char* s2) {
     return !_mm256_testz_si256(res, res);
 }
 ```
+##### Time interval of program execution: 14.1 seconds.
+##### The hottest functions:
+- ```strcpy``` (6.5% of the time)

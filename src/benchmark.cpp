@@ -7,6 +7,8 @@
 
 #include "strcpy.h"
 
+volatile size_t temp = 0;
+
 // static ------------------------------------------------------------------------------------------
 
 static size_t GetFileSize(FILE* fd);
@@ -40,19 +42,12 @@ void FillHashTable(THashTable* ht, char* textBuffer) {
 }
 
 void RunSearchBenchmark(THashTable* ht, char* textBuffer) {
-    size_t temp = 0;
-    for (int i = 0; i < 14; i++) {
-        for (char* token = strtok(textBuffer, kdelimiters); token;
-            token = strtok(NULL, kdelimiters)) {
+    for (char* token = strtok(textBuffer, kdelimiters); token;
+        token = strtok(NULL, kdelimiters)) {
 
-            alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
-            strcpy(key, token);
-            temp = HT_Get(ht, key); 
-            HT_Remove(ht, key);
-            HT_Insert(ht, key);
-        }
-        free(textBuffer);
-        textBuffer = FillBuffer();
+        alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
+        strcpy(key, token);
+        temp = HT_Get(ht, key); 
     }
 }
 
