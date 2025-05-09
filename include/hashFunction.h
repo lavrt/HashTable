@@ -5,10 +5,12 @@
 
 #include <string.h>
 
-unsigned MurmurHash2(const char* key, unsigned len);
+extern "C" unsigned djb2_asm(const char*);
+
+unsigned djb2(const char* key);
 
 inline unsigned Hash(const char* key) {
-    return MurmurHash2(key, strlen(key)) % kHashSize;
+    return djb2(key) % kHashTableSize;
 }
 
 #endif // HASH_FUNCTION_H

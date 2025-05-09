@@ -12,7 +12,7 @@ INC_DIR = include
 DUMP_DIR = dump
 
 SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/hashTable.cpp $(SRC_DIR)/hashFunction.cpp $(SRC_DIR)/benchmark.cpp
-ASM_SOURCES = $(SRC_DIR)/strcpy.s
+ASM_SOURCES = $(SRC_DIR)/hash.s
 OBJECTS = $(SOURCES:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 ASM_OBJECTS = $(ASM_SOURCES:$(SRC_DIR)/%.s=$(BUILD_DIR)/%.o)
 

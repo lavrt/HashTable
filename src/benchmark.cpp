@@ -5,8 +5,6 @@
 #include <assert.h>
 #include <immintrin.h>
 
-#include "strcpy.h"
-
 volatile size_t temp = 0;
 
 // static ------------------------------------------------------------------------------------------
@@ -44,10 +42,12 @@ void FillHashTable(THashTable* ht, char* textBuffer) {
 void RunSearchBenchmark(THashTable* ht, char* textBuffer) {
     for (char* token = strtok(textBuffer, kdelimiters); token;
         token = strtok(NULL, kdelimiters)) {
-
-        alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
-        strcpy(key, token);
-        temp = HT_Get(ht, key); 
+        
+        for (size_t i = 0; i < 30; i++) {
+            alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
+            strcpy(key, token);
+            temp = HT_Get(ht, key); 
+        }
     }
 }
 

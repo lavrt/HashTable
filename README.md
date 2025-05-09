@@ -18,54 +18,18 @@ For an ideal hash function, the following conditions are met:
 
 A situation where the same hash value is obtained for different keys is called a collision. Two common methods of dealing with collisions are linear probing and the chain method. This project uses the chain method.
 
-The project uses MurMur2 as a hash function. The MurMur2 hash function is a simple but effective non-cryptographic hash function developed by Austin Appleby. It is used to quickly calculate hashes in various applications.
+The project uses DJB2 as a hash function. DJB2 is a simple, fast, and efficient non-cryptographic hash function created by Daniel J. Bernstein (hence the name DJB). It is widely used in hash tables, compilers, and other applications where speed and a decent distribution of hash values are required, but cryptographic security is not necessary.
 
 <details>
-<summary>Show MurMur2 code</summary>
+<summary>Show DJB2 code</summary>
 
 ```cpp
-unsigned MurmurHash2(const char* key, unsigned len) {
-    const unsigned m = 0x5bd1e995;
-    const unsigned seed = 0;
-    const int r = 24;
-
-    unsigned h = seed ^ len;
-
-    const unsigned char* data = (const unsigned char*)key;
-    unsigned k = 0;
-
-    while (len >= 4) {
-        k  = data[0];
-        k |= data[1] << 8;
-        k |= data[2] << 16;
-        k |= data[3] << 24;
-
-        k *= m;
-        k ^= k >> r;
-        k *= m;
-
-        h *= m;
-        h ^= k;
-
-        data += 4;
-        len -= 4;
+unsigned djb2(const char* key) {
+    unsigned hash = 0;
+    while (*key) {
+        hash = (hash << 5) + hash + *key++;
     }
-
-    switch (len) {
-        case 3:
-            h ^= data[2] << 16;
-        case 2:
-            h ^= data[1] << 8;
-        case 1:
-            h ^= data[0];
-            h *= m;
-    };
-
-    h ^= h >> 13;
-    h *= m;
-    h ^= h >> 15;
-
-    return h;
+    return hash;
 }
 ```
 </details> 
@@ -79,15 +43,19 @@ unsigned MurmurHash2(const char* key, unsigned len) {
 | Kernel Version          | Linux 6.11.0-21-generic            |
 | gcc compiler version    | 13.3.0                             |
 | Load factor             | 18                                 |
-| Utilities               | perf                               |
+| Utilities               | perf, hyperfine                               |
 
 # Program optimization
 
 ## Initial performance
-##### Time interval of program execution: 15.4 seconds.
+##### Time interval of program execution: 9.115 ± 0.275 seconds.
+![hyperfine1](./data/images/hf1.png)
 ##### The hottest functions:
-- ```strcmp``` (65.9% of the time)
-- ```strcpy``` (6.5% of the time)
+- ```strcmp``` (30.08% of the time)
+- ```HT_Get``` (22.29% of the time)
+- ```djb2``` (9.87% of the time)
+
+![perf1](./data/images/pf1.png)
 
 ## Optimization of ```strcmp```
 Each word in the text is no longer than 32 characters. This makes SIMD optimization possible.
@@ -99,6 +67,12 @@ static int FastStrcmp(const char* s1, const char* s2) {
     return !_mm256_testz_si256(res, res);
 }
 ```
-##### Time interval of program execution: 14.1 seconds.
+Let's analyze the results after optimization:
+##### Time interval of program execution: 6.124 ± 0.109 seconds (48.84% increase in work speed).
+![hyperfine2](./data/images/hf2.png)
 ##### The hottest functions:
-- ```strcpy``` (6.5% of the time)
+- ```HT_Get``` (32.14% of the time)
+- ```strcpy``` (11.27% of the time)
+- ```djb2``` (10.79% of the time)
+
+![perf2](./data/images/pf2.png)
