@@ -68,7 +68,7 @@ void HT_TextDump(THashTable* ht) {
 
         fprintf(dumpFile, "Bucket %lu:\n", i);
         for (size_t j = 0; j < bucket->size; j++) {
-            fprintf(dumpFile, "  '%s' -- %d\n", bucket->nodes[j].key, bucket->nodes[j].value);
+            fprintf(dumpFile, "  '%s' -- %zu\n", bucket->nodes[j].key, bucket->nodes[j].value);
         }
     }
 

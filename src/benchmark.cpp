@@ -24,7 +24,11 @@ char* FillBuffer() {
     char* textBuffer = (char*)calloc(fileSize + 1, sizeof(char));
     assert(textBuffer);
 
-    fread(textBuffer, sizeof(char), fileSize, inputFile);
+    size_t readCount = fread(textBuffer, sizeof(char), fileSize, inputFile);
+    if (readCount != fileSize) {
+        fclose(inputFile);
+        assert(0);
+    }
 
     fclose(inputFile);
 
@@ -36,7 +40,8 @@ void FillHashTable(THashTable* ht, char* textBuffer) {
         token = strtok(NULL, kDelimiters)) {
 
         alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
-        strncpy(key, token, kMaxKeyLength);
+        strncpy(key, token, kMaxKeyLength - 1);
+        key[kMaxKeyLength - 1] = '\0';
         HT_Insert(ht, key);
     }
 }
@@ -47,7 +52,8 @@ void RunSearchBenchmark(THashTable* ht, char* textBuffer) {
         
         for (size_t i = 0; i < 30; i++) {
             alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
-            strncpy(key, token, kMaxKeyLength);
+            strncpy(key, token, kMaxKeyLength - 1);
+            key[kMaxKeyLength - 1] = '\0';
             temp = HT_Get(ht, key); 
         }
     }
