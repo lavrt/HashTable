@@ -6,7 +6,7 @@
 #include <string.h>
 
 const char* const kNameOfInputFile = "./data/text.txt";
-const char* const kdelimiters = " \t\n\r.,;:!?()\"\'‘’";
+const char* const kDelimiters = " \t\n\r.,;:!?()\"\'‘’";
 
 char* FillBuffer();
 void FillHashTable(THashTable* ht, char* textBuffer);

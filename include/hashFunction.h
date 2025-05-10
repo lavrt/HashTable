@@ -4,13 +4,12 @@
 #include "hashTable.h"
 
 #include <string.h>
+#include <stdint.h>
 
-extern "C" unsigned djb2_asm(const char*);
-
-unsigned djb2(const char* key);
+uint32_t crc32(const char* key, size_t length);
 
 inline unsigned Hash(const char* key) {
-    return djb2(key) % kHashTableSize;
+    return crc32(key, strlen(key)) % kHashTableSize;
 }
 
 #endif // HASH_FUNCTION_H

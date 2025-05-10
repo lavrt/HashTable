@@ -5,11 +5,13 @@
 #include <assert.h>
 #include <immintrin.h>
 
-volatile size_t temp = 0;
-
 // static ------------------------------------------------------------------------------------------
 
-static size_t GetFileSize(FILE* fd);
+static volatile size_t temp = 0; // We use volatile so that the compiler does not optimize the loop.
+                                 // This is important for measuring performance, because without volatile,
+                                 // the compiler can delete useless code from its point of view.
+
+static long GetFileSize(FILE* fd);
 
 // global ------------------------------------------------------------------------------------------
 
@@ -30,22 +32,22 @@ char* FillBuffer() {
 }
 
 void FillHashTable(THashTable* ht, char* textBuffer) { 
-    for (char* token = strtok(textBuffer, kdelimiters); token;
-        token = strtok(NULL, kdelimiters)) {
+    for (char* token = strtok(textBuffer, kDelimiters); token;
+        token = strtok(NULL, kDelimiters)) {
 
         alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
-        strcpy(key, token);
+        strncpy(key, token, kMaxKeyLength);
         HT_Insert(ht, key);
     }
 }
 
 void RunSearchBenchmark(THashTable* ht, char* textBuffer) {
-    for (char* token = strtok(textBuffer, kdelimiters); token;
-        token = strtok(NULL, kdelimiters)) {
+    for (char* token = strtok(textBuffer, kDelimiters); token;
+        token = strtok(NULL, kDelimiters)) {
         
         for (size_t i = 0; i < 30; i++) {
             alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
-            strcpy(key, token);
+            strncpy(key, token, kMaxKeyLength);
             temp = HT_Get(ht, key); 
         }
     }
@@ -53,11 +55,11 @@ void RunSearchBenchmark(THashTable* ht, char* textBuffer) {
 
 // static ------------------------------------------------------------------------------------------
 
-static size_t GetFileSize(FILE* fd) {
-	size_t fileSize = 0;
+static long GetFileSize(FILE* fd) {
+	long fileSize = 0;
 
     fseek(fd, 0, SEEK_END);
-    fileSize = ftello(fd);
+    fileSize = ftell(fd);
     fseek(fd, 0, SEEK_SET);
 
 	return fileSize;

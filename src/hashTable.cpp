@@ -34,7 +34,7 @@ EStatus HT_Insert(THashTable* ht, const char* key) {
         return Failed;
     }
 
-    strcpy(bucket->nodes[bucket->size].key, key);
+    strncpy(bucket->nodes[bucket->size].key, key, kMaxKeyLength);
     bucket->nodes[bucket->size].value = 1;
     bucket->size++;
 
