@@ -3,21 +3,26 @@
 
 #include <stdlib.h>
 
-const size_t TABLE_SIZE = 340;
+const char* const kNameOfGraphDumpFile = "./dump/dump.dot";
+const char* const kNameOfTextDumpFile = "./dump/dump.txt";
 
-const char* const NAME_OF_GRAPH_DUMP_FILE = "./dump/dump.dot";
-const char* const NAME_OF_TEXT_DUMP_FILE = "./dump/dump.txt";
+const size_t kHashTableSize = 340;
+const size_t kMaxNodesInBucket = 100;
+const size_t kMaxKeyLength = 32;
+const size_t kMemoryAlignment = 32;
 
 struct TNode {
-    char* key;
-    void* value;
-    TNode* next;
+    alignas(kMemoryAlignment) char key[kMaxKeyLength];
+    size_t value;
+};
+
+struct TBucket {
+    TNode nodes[kMaxNodesInBucket];
+    size_t size;
 };
 
 struct THashTable {
-    TNode** buckets;
-    size_t size;
-    size_t count;
+    TBucket buckets[kHashTableSize];
 };
 
 enum EStatus {
@@ -25,12 +30,10 @@ enum EStatus {
     Finished
 };
 
-THashTable* HT_Create();
-void HT_Destroy(THashTable* ht);
-void HT_Insert(THashTable* ht, char* key);
-void* HT_Get(THashTable* ht, const char* key);
-EStatus HT_Remove(THashTable* ht, const char* key);
-void HT_GraphDump(THashTable* ht);
+void HT_Create(THashTable* ht);
+EStatus HT_Insert(THashTable* ht, const char* key);
+int HT_Get(THashTable* ht, const char* key);
 void HT_TextDump(THashTable* ht);
+float CalculateLoadFactor(const THashTable* table);
 
 #endif // HASH_TABLE_H

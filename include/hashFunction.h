@@ -4,11 +4,12 @@
 #include "hashTable.h"
 
 #include <string.h>
+#include <stdint.h>
 
-unsigned MurmurHash2(const char* key, unsigned len);
+uint32_t crc32(const char* key, size_t length);
 
-inline unsigned Hash(const char* key, size_t tableSize) {
-    return MurmurHash2(key, strlen(key)) % tableSize;
+inline unsigned Hash(const char* key) {
+    return crc32(key, strlen(key)) % kHashTableSize;
 }
 
 #endif // HASH_FUNCTION_H

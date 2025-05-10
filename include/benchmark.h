@@ -5,8 +5,8 @@
 
 #include <string.h>
 
-const char* const TEXT_FILE_NAME = "./data/text.txt";
-const char* const delimiters = " \t\n\r.,;:!?()\"\'‘’";
+const char* const kNameOfInputFile = "./data/text.txt";
+const char* const kDelimiters = " \t\n\r.,;:!?()\"\'‘’";
 
 char* FillBuffer();
 void FillHashTable(THashTable* ht, char* textBuffer);

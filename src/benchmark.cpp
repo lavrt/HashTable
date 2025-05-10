@@ -5,10 +5,18 @@
 #include <assert.h>
 #include <immintrin.h>
 
-#include "std.h"
+// static ------------------------------------------------------------------------------------------
+
+static volatile size_t temp = 0; // We use volatile so that the compiler does not optimize the loop.
+                                 // This is important for measuring performance, because without volatile,
+                                 // the compiler can delete useless code from its point of view.
+
+static long GetFileSize(FILE* fd);
+
+// global ------------------------------------------------------------------------------------------
 
 char* FillBuffer() {
-    FILE* inputFile = fopen(TEXT_FILE_NAME, "rb");
+    FILE* inputFile = fopen(kNameOfInputFile, "rb");
     assert(inputFile);
 
     size_t fileSize = GetFileSize(inputFile);
@@ -23,22 +31,36 @@ char* FillBuffer() {
     return textBuffer;
 }
 
-void FillHashTable(THashTable* ht, char* textBuffer) {
-    for (char* token = strtok(textBuffer, delimiters); token; token = strtok(NULL, delimiters)) {
-        char* key = (char*)aligned_alloc(32, sizeof(char) * 32); // NOTE
-        assert(key);
-        strcpy(key, token);
+void FillHashTable(THashTable* ht, char* textBuffer) { 
+    for (char* token = strtok(textBuffer, kDelimiters); token;
+        token = strtok(NULL, kDelimiters)) {
+
+        alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
+        strncpy(key, token, kMaxKeyLength);
         HT_Insert(ht, key);
     }
 }
 
 void RunSearchBenchmark(THashTable* ht, char* textBuffer) {
-    size_t temp = 0;
-    for (char* token = strtok(textBuffer, delimiters); token; token = strtok(NULL, delimiters)) {
-        char* key = (char*)aligned_alloc(32, sizeof(char) * 32); // NOTE
-        assert(key);
-        strcpy(key, token);
-        temp = *(size_t*)HT_Get(ht, key);
-        // printf("%lu ", temp);
+    for (char* token = strtok(textBuffer, kDelimiters); token;
+        token = strtok(NULL, kDelimiters)) {
+        
+        for (size_t i = 0; i < 30; i++) {
+            alignas(kMemoryAlignment) char key[kMaxKeyLength] = {};
+            strncpy(key, token, kMaxKeyLength);
+            temp = HT_Get(ht, key); 
+        }
     }
+}
+
+// static ------------------------------------------------------------------------------------------
+
+static long GetFileSize(FILE* fd) {
+	long fileSize = 0;
+
+    fseek(fd, 0, SEEK_END);
+    fileSize = ftell(fd);
+    fseek(fd, 0, SEEK_SET);
+
+	return fileSize;
 }

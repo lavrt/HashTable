@@ -1,38 +1,40 @@
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
 #include <sched.h>
+#include <assert.h>
 
 #include "hashTable.h"
 #include "benchmark.h"
 
+// static ------------------------------------------------------------------------------------------
+
 static int SetCpuCore(int coreIndex);
 
-int main() {
-    SetCpuCore(7); // NOTE
+// global ------------------------------------------------------------------------------------------
 
-    THashTable* ht = HT_Create();
-    
+int main() {
+    SetCpuCore(7); 
+
+    THashTable* ht = (THashTable*)calloc(1, sizeof(THashTable));
+    assert(ht);
+    HT_Create(ht);
+
     char* textBuffer = FillBuffer();
     FillHashTable(ht, textBuffer);
     free(textBuffer);
-
     textBuffer = FillBuffer();
     RunSearchBenchmark(ht, textBuffer);
     free(textBuffer);
 
     HT_TextDump(ht);
-    HT_Destroy(ht);
-    
-    // FIXME free array
 
     return 0;
 }
+
+// static ------------------------------------------------------------------------------------------
 
 static int SetCpuCore(int coreIndex) {
     cpu_set_t mask;
     CPU_ZERO(&mask);
     CPU_SET(coreIndex, &mask);
 
-    return (sched_setaffinity(0, sizeof(mask), &mask) == -1) ? 0 : 1;
+    return sched_setaffinity(0, sizeof(mask), &mask) != -1;
 }

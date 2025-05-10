@@ -1,191 +1,100 @@
 #include "hashTable.h"
 
+#include <immintrin.h>
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 
 #include "hashFunction.h"
-#include "std.h"
 
-THashTable* HT_Create() {
-    THashTable* ht = (THashTable*)calloc(1, sizeof(THashTable));
-    assert(ht);
+// static ------------------------------------------------------------------------------------------
 
-    ht->buckets = (TNode**)calloc(TABLE_SIZE, sizeof(TNode*));
-    assert(ht->buckets);
+static int FastStrcmp(const char* s1, const char* s2);
 
-    ht->size = TABLE_SIZE;
-    ht->count = 0;
+// global ------------------------------------------------------------------------------------------
 
-    return ht;
-}
-
-void HT_Destroy(THashTable* ht) {
-    for (size_t i = 0; i < ht->size; i++) {
-        TNode* current = ht->buckets[i];
-        while (current) {
-            TNode* temp = current;
-            current = current->next;
-            free(temp->value);
-            free(temp->key);
-            free(temp);
-        }
+void HT_Create(THashTable* ht) {
+    for (size_t i = 0; i < kHashTableSize; i++) {
+        ht->buckets[i].size = 0;
     }
-
-    free(ht->buckets);
-    free(ht);
 }
 
-void HT_Insert(THashTable* ht, char* key) {
-    unsigned index = Hash(key, ht->size);
-    TNode* current = ht->buckets[index];
+EStatus HT_Insert(THashTable* ht, const char* key) {
+    unsigned index = Hash(key);
+    TBucket* bucket = &ht->buckets[index];
 
-    while (current) {
-        if (!strcmp(current->key, key)) {
-            ++*(size_t*)(current->value);
-            return;
-        }
-        current = current->next;
-    }
-
-    TNode* newNode = (TNode*)calloc(1, sizeof(TNode));
-    assert(newNode);
-
-    size_t* tempValue = (size_t*)calloc(1, sizeof(size_t));
-    assert(tempValue);
-
-    *(tempValue) = 1;
-
-    newNode->key = key;
-    newNode->value = tempValue;
-    newNode->next = ht->buckets[index];
-    ht->buckets[index] = newNode;
-    ht->count++;
-}
-
-void* HT_Get(THashTable* ht, const char* key) {
-    unsigned index = Hash(key, ht->size);
-    TNode* current = ht->buckets[index];
-
-    while (current) {
-        if (!strcmp(current->key, key)) {
-            return current->value;
-        }
-        current = current->next;
-    }
-
-    return NULL;
-}
-
-EStatus HT_Remove(THashTable* ht, const char* key) {
-    unsigned index = Hash(key, ht->size);
-    TNode* current = ht->buckets[index];
-    TNode* prev = NULL;
-
-    while (current) {
-        if (!strcmp(current->key, key)) {
-            if (!prev) {
-                ht->buckets[index] = current->next;
-            } else {
-                prev->next = current->next;
-            }
-
-            free(current->value);
-            free(current->key);
-            free(current);
-            ht->count--;
-
+    for (size_t i = 0; i < bucket->size; i++) {
+        if (!FastStrcmp(bucket->nodes[i].key, key)) {
+            bucket->nodes[i].value++;
             return Finished;
         }
-
-        prev = current;
-        current = current->next;
     }
 
-    return Failed;
+    if (bucket->size >= kMaxNodesInBucket) {
+        return Failed;
+    }
+
+    strncpy(bucket->nodes[bucket->size].key, key, kMaxKeyLength);
+    bucket->nodes[bucket->size].value = 1;
+    bucket->size++;
+
+    return Finished;
 }
 
-void HT_GraphDump(THashTable* ht) {
-    FILE* dumpFile = fopen(NAME_OF_GRAPH_DUMP_FILE, "wb");
-    assert(dumpFile);
+int HT_Get(THashTable* ht, const char* key) {
+    unsigned index = Hash(key);
+    TBucket* bucket = &ht->buckets[index];
 
-    fprintf(dumpFile,
-        "digraph HashTable {\n"
-        "    rankdir=\"LR\";\n" 
-        "    node [shape=record, style=filled, fillcolor=lightblue];\n\n"
-        "    hash_table [label=\""
-    );
-
-    for (size_t i = 0; i < ht->size; i++) {
-        fprintf(dumpFile, "<%lu>%lu", i, i);
-        if (i == ht->size - 1) {
-            fprintf(dumpFile, "\", shape=record, fillcolor=lightgrey];\n\n");
-            break;
-        }
-        fprintf(dumpFile, "|");
-    }
-    
-    fprintf(dumpFile, "    node [shape=box];\n\n");
-
-    for (size_t i = 0; i < ht->size; i++) {
-        fprintf(dumpFile,
-            "    subgraph cluster_%lu {\n"
-            "        label=\"bucket %lu\";\n",
-            i, i
-        );
-
-        TNode* current = ht->buckets[i];
-        for (size_t j = 0; current; j++) {
-            fprintf(dumpFile,
-                "        node_%lu_%lu [label=\"\\\"%s\\\" : %lu\"];\n",
-                i, j, current->key, *((size_t*)current->value)
-            );
-            current = current->next;
-        }
-
-        current = ht->buckets[i];
-        fprintf(dumpFile, "       ");
-        for (size_t j = 0; current; j++) {
-            fprintf(dumpFile, " node_%lu_%lu", i, j);
-            if (current->next) {
-                fprintf(dumpFile, " ->");
-            } else {
-                fprintf(dumpFile, ";\n    }\n");
-            }
-            current = current->next;
+    for (size_t i = 0; i < bucket->size; i++) {
+        if (!FastStrcmp(bucket->nodes[i].key, key)) {
+            return bucket->nodes[i].value;
         }
     }
-    fprintf(dumpFile, "}\n");
 
-    // dot -Tpng ./dump/dump.dot -o graph.png
-
-    fclose(dumpFile);
+    return -1;
 }
 
 void HT_TextDump(THashTable* ht) {
-    FILE* dumpFile = fopen(NAME_OF_TEXT_DUMP_FILE, "wb");
+    FILE* dumpFile = fopen(kNameOfTextDumpFile, "wb");
     assert(dumpFile);
 
-    fprintf(
-        dumpFile,
-        "hash table: [%p]\n"
-        "number of buckets: %lu\n"
-        "total number of items: %lu\n"
-        "load factor: %.lf\n\n",
-        ht, ht->size, ht->count, (double)ht->count / ht->size
-    );
+    fprintf(dumpFile, "Map\nloadfactor: %.f\n\n", CalculateLoadFactor(ht));
 
-    for (size_t i = 0; i < ht->size; i++) {
-        TNode* current = ht->buckets[i];
-        fprintf(dumpFile, "[%p] ", current);
-
-        while (current) {
-            fprintf(dumpFile, "{ %s | %d } ", current->key, *((int*)current->value));
-            current = current->next;
+    for (size_t i = 0; i < kHashTableSize; i++) {
+        TBucket* bucket = &ht->buckets[i];
+        if (!bucket->size) {
+            continue;
         }
 
-        fprintf(dumpFile, "\n");
+        fprintf(dumpFile, "Bucket %lu:\n", i);
+        for (size_t j = 0; j < bucket->size; j++) {
+            fprintf(dumpFile, "  '%s' -- %d\n", bucket->nodes[j].key, bucket->nodes[j].value);
+        }
     }
 
     fclose(dumpFile);
+}
+
+float CalculateLoadFactor(const THashTable* table) {
+    size_t total_elements = 0;
+    size_t non_empty_buckets = 0;
+
+    for (size_t i = 0; i < kHashTableSize; i++) {
+        if (table->buckets[i].size > 0) {
+            total_elements += table->buckets[i].size;
+            non_empty_buckets++;
+        }
+    }
+
+    return (non_empty_buckets) ? ((float)total_elements / non_empty_buckets) : 0;
+}
+
+
+// static ------------------------------------------------------------------------------------------
+
+static int FastStrcmp(const char* s1, const char* s2) {
+    const __m256i vec1 = _mm256_load_si256((const __m256i*)s1);
+    const __m256i vec2 = _mm256_load_si256((const __m256i*)s2);
+    const __m256i res = _mm256_xor_si256(vec1, vec2);
+    return !_mm256_testz_si256(res, res);
 }
