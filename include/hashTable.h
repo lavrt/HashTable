@@ -3,13 +3,17 @@
 
 #include <stdlib.h>
 
-const char* const kNameOfGraphDumpFile = "./dump/dump.dot";
-const char* const kNameOfTextDumpFile = "./dump/dump.txt";
+// static ------------------------------------------------------------------------------------------
 
-const size_t kHashTableSize = 340;
-const size_t kMaxNodesInBucket = 100;
-const size_t kMaxKeyLength = 32;
-const size_t kMemoryAlignment = 32;
+static const char* const kNameOfGraphDumpFile = "./dump/dump.dot";
+static const char* const kNameOfTextDumpFile = "./dump/dump.txt";
+
+static const size_t kHashTableSize = 340;
+static const size_t kMaxNodesInBucket = 100;
+static const size_t kMaxKeyLength = 32;
+static const size_t kMemoryAlignment = 32;
+
+// global ------------------------------------------------------------------------------------------
 
 struct TNode {
     alignas(kMemoryAlignment) char key[kMaxKeyLength];

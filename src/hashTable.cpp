@@ -58,7 +58,7 @@ void HT_TextDump(THashTable* ht) {
     FILE* dumpFile = fopen(kNameOfTextDumpFile, "wb");
     assert(dumpFile);
 
-    fprintf(dumpFile, "Map\nloadfactor: %.f\n\n", CalculateLoadFactor(ht));
+    fprintf(dumpFile, "Hash Table\nloadfactor: %.f\n\n", CalculateLoadFactor(ht));
 
     for (size_t i = 0; i < kHashTableSize; i++) {
         TBucket* bucket = &ht->buckets[i];
