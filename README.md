@@ -20,10 +20,7 @@ A situation where the same hash value is obtained for different keys is called a
 
 CRC32 (Cyclic Redundancy Check) is a fast non-cryptographic hash function. It ensures an even distribution of hash values and is quite efficient. In addition, the processors support a special crc32 instruction, which we will use in our project.
 
-<details>
-<summary>Show CRC32 code</summary>
-
-```cpp
+```c
 uint32_t crc32(const char* key, size_t length) {
     uint32_t hash = 0x0BA0BAB0;
     
@@ -38,7 +35,6 @@ uint32_t crc32(const char* key, size_t length) {
     return hash;   
 }
 ```
-</details> 
 
 ## Settings
 |                         |                                    |
